@@ -68,4 +68,27 @@ public class Login {
           }
      
     }
+    public boolean checkCellPhoneNumber()
+    {
+       
+   
+        int lengthNumber = this.CellNumber.length(); //Length of cell number.
+        
+        if(this.CellNumber.startsWith("+27") && lengthNumber == 12)
+        {
+            return true;
+        }
+        else if(this.CellNumber.startsWith("0"))
+        {
+            System.err.println("The cell number does not follow the of the local number");
+             return false;
+        }
+        else
+        {
+            System.err.println("Incorrect Number");
+            return false;
+        }
+        
+  
+    }
    
