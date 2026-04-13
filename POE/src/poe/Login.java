@@ -112,4 +112,27 @@ public class Login {
     
     }
     
+    public boolean loginUser(String Username,String Password)
+    {
+        String[] userArray =new String[4];
+        boolean isFound =false; //validation flag.
+        
+        if(!UserList.isEmpty()) //Error 
+        {
+              for(String[] CurrentArrUser : UserList ) //Loop every entry of the arraylist
+        {
+            if(CurrentArrUser[0].contentEquals(Username) && CurrentArrUser[1].contentEquals(Password))
+            {
+               userArray = CurrentArrUser; //Retrive the user.
+               isFound =true;
+               return isFound; //User is found
+            }
+        }
+        }
+        
+        return isFound; //Will return false if user is not found
+
+      
+    }
     
+   
