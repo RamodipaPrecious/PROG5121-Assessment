@@ -32,6 +32,20 @@ public class POE {
      Login user = new Login(username,password,cellNumber);
      String registrationResult = user.registerUser();
      
+    System.out.println(registrationResult);
+    
+     System.out.println(" LOGIN ");
+
+        System.out.println("Enter username: ");
+        Scanner UserInput = new Scanner(System.in);
+        String loginUser = UserInput.nextLine();
+
+        System.out.println("Enter password: ");
+        Scanner PassInput = new Scanner(System.in);
+        String loginPassword = PassInput.nextLine();
+        
+        user.loginUser(loginUser,loginPassword );
+        user.returnLoginStatus();
         
 		
 	} catch (Exception e) {
