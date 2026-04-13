@@ -135,4 +135,33 @@ public class Login {
       
     }
     
-   
+    public String returnLoginStatus()
+    {
+        String message;
+        if(this.loginUser(Usersname, password))
+        {
+            message ="Welcome it is great to see you again.";
+            System.out.println(message);
+            return message;
+        }else
+        {
+            message = "Username or password incorrect please try again.";
+            System.out.println(message);
+             return message;
+        }
+    }
+ public String getCellNumber()
+{
+ return this.CellNumber;
+}
+public String getUserName()
+{
+    return Usersname;
+            
+}
+public String getPassword()
+{
+    return this.password;
+            
+}
+}
