@@ -91,4 +91,25 @@ public class Login {
         
   
     }
-   
+    public String registerUser()
+    {
+     if(this.checkUserName()) //Validate if the username is correct
+     {
+         
+         if(this.checkCellPhoneNumber()) //Validate if the Cell number is correct and is local
+         {
+             if(this.checkPasswordComplexity())
+             {
+                //Save the user information
+                 String[] tempUser ={this.Usersname,this.password,this.CellNumber};
+                 this.UserList.add(tempUser); //then Store in the database
+                 return "Cell phone number succesfully added.";
+             }
+         }
+     }
+     return "Cell phone number incorrectly formatted or does not contain international code. " ;
+     
+    
+    }
+    
+    
