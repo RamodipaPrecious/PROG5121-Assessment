@@ -34,4 +34,38 @@ public class Login {
             return false; //not met the min requirements
         }
     }
+    public boolean checkPasswordComplexity()
+    {
+       //Store the checked information.
+        int CountLength = this.password.length();
+        
+        //The conditions that are checked.
+        //----------------------------------------------------
+        //1. Check the length of the password
+        //2. Contains acapital number 
+        //3. Contains a number 
+        //4. Check if it has special Charecters
+        
+        //Using regex pattern to read the password
+        String ALLSpecialChar ="^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$";
+       
+       boolean Allconditions_Met =false; //Check if All conditions are true
+              
+      
+      //Check all the condition if meet the min requiremets
+          if(this.password.matches(ALLSpecialChar)) //If true
+          {
+                  Allconditions_Met =true;
+                  System.out.println("Password successfully captured.");
+                  return Allconditions_Met; 
+              
+          }else
+          {
+              System.err.println("Password is not correctly formatted; please ensure that the password "
+                      + "contains at least eight characters; a capital letter, a number, and a special"
+                      + " character.");
+              return Allconditions_Met;
+          }
+     
+    }
    
