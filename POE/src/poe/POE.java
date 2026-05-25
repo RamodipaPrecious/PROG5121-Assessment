@@ -8,13 +8,14 @@ import java.util.Scanner;
 
 public class POE {
 
-    /**
-     * @param args the command line arguments
-     */
+ 
+    
     public static void main(String[] args) {
+       
+        while(true){   
         try {
-            
-      System.out.println("=======Input user data  ============");
+         
+      System.out.println("=======Register user  ============");
       System.out.println("What is your username");
       Scanner Nameinput = new Scanner(System.in);
       String username = Nameinput.nextLine();
@@ -29,31 +30,77 @@ public class POE {
       Scanner Cellinput = new Scanner(System.in);
       String cellNumber = Cellinput.nextLine();
         
+      
      Login user = new Login(username,password,cellNumber);
      String registrationResult = user.registerUser();
+     System.out.println(registrationResult);
      
-    System.out.println(registrationResult);
+    if(registrationResult.contains("Is registed"))
+    {
+     System.out.println("================Log user==============");
+     System.out.println("What is your username");
+     Scanner U_Name = new Scanner(System.in);
+     String getName = U_Name.nextLine();
     
-     System.out.println(" LOGIN ");
-
-        System.out.println("Enter username: ");
-        Scanner UserInput = new Scanner(System.in);
-        String loginUser = UserInput.nextLine();
-
-        System.out.println("Enter password: ");
-        Scanner PassInput = new Scanner(System.in);
-        String loginPassword = PassInput.nextLine();
-        
-        user.loginUser(loginUser,loginPassword );
-        user.returnLoginStatus();
-        
-		
+      System.out.println("What is your Password");
+      Scanner U_password = new Scanner(System.in);
+      String getPassword = U_password.nextLine();
+    
+     user.loginUser(getName, getPassword);
+     System.out.println("##################");
+     String message = user.returnloginStatus(getName, password);
+     
+     //After login-in
+     if(message.contains("Welcome to QuickChat messages"))
+     {
+              boolean QuitProgram = false;
+              
+              
+              //Run until the user chooses to quit the program
+         while(QuitProgram ==false)
+         {
+      System.out.println("Main menu: choose the following \n a)Send Messages \n b)Show  recently sen messages \n c)Quit ");
+      Scanner Scan_manu = new Scanner(System.in);
+      
+      //Convert the input to lower case to avoid errors
+      String Get_option = Scan_manu.nextLine();
+      String Manu_option = Get_option.toLowerCase(); //
+      
+       String number = user.getCellNumber(); //Get the user cell number
+       
+          MessageClass messagesHandler = new MessageClass(number);
+          
+          
+      if(Manu_option.equals("a"))
+      {
+         messagesHandler.SendMessage();
+          
+      }
+      else if(Manu_option.equals("b"))
+      {
+      
+      }
+       else if(Manu_option.equals("c"))
+      {
+      //The user choose to quit
+          QuitProgram =true; 
+      }else
+       { 
+           System.err.println("Chose the wrong option try again!");
+           System.err.println(Manu_option);
+       }
+         
+     }
+     }
+    }
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
-		System.err.println("An error occured while inputting");
+		System.err.println("An error occured while menu inputting");
                 
 	}
-         
-    }    
+    }
+    }
+        
+        
     
 }

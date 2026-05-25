@@ -1,4 +1,3 @@
-
 package poe;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class Login {
         
         if(tempNameLength <= 5 &&this.Usersname.contains("_") ==true)
         {
-            System.out.println("Username  successfully captured.");
+            System.out.println("Username  successfully captured");
             return true; //Conditions been met.
         }else
         {
@@ -63,7 +62,7 @@ public class Login {
           {
               System.err.println("Password is not correctly formatted; please ensure that the password "
                       + "contains at least eight characters; a capital letter, a number, and a special"
-                      + " character.");
+                      + " character");
               return Allconditions_Met;
           }
      
@@ -103,11 +102,11 @@ public class Login {
                 //Save the user information
                  String[] tempUser ={this.Usersname,this.password,this.CellNumber};
                  this.UserList.add(tempUser); //then Store in the database
-                 return "Cell phone number succesfully added.";
+                 return "Is registed";
              }
          }
      }
-     return "Cell phone number incorrectly formatted or does not contain international code. " ;
+     return "Not registed";
      
     
     }
@@ -135,17 +134,17 @@ public class Login {
       
     }
     
-    public String returnLoginStatus()
+    public String returnloginStatus(String name, String pass)
     {
         String message;
-        if(this.loginUser(Usersname, password))
+        if(this.loginUser(name, pass))
         {
-            message ="Welcome it is great to see you again.";
+            message ="Welcome to QuickChat messages";
             System.out.println(message);
             return message;
         }else
         {
-            message = "Username or password incorrect please try again.";
+            message = "A failed login";
             System.out.println(message);
              return message;
         }
