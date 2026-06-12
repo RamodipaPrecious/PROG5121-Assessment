@@ -1,246 +1,337 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package poe;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+       package poe;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-
 public class MessageClass {
-    private String MessageID ;
-    private String userCellNumber ="";
-    private String message ="";
-    
-     //JSONObject details = new JSONObject();
-    private ArrayList<String> userMessages = null;
-    
-    public MessageClass(String cell)
-    {
-        this.userCellNumber = cell;
-        userMessages = new ArrayList<>();
+
+    private String MessageID;
+    private final String userCellNumber;
+    private String message;
+
+    private final ArrayList<String> userMessages;
+
+    // Message tracking
+    private final ArrayList<String> sentMessages = new ArrayList<>();
+    private final ArrayList<String> disregardedMessages = new ArrayList<>();
+
+    // Stored messages
+    private final ArrayList<String> storedMessages = new ArrayList<>();
+    private final ArrayList<String> storedMessageIDs = new ArrayList<>();
+    private final ArrayList<String> storedMessageHashes = new ArrayList<>();
+    private final ArrayList<String> storedRecipients = new ArrayList<>();
+    private final ArrayList<String> storedSenders = new ArrayList<>();
+
+    public MessageClass(String userCellNumber) {
+        this.userCellNumber = userCellNumber;
+        this.userMessages = new ArrayList<>();
     }
-    
-    public boolean checkMessageID()
-    {
-        if(MessageID.length() < 10) //If the ID length is not long enough
-        {
-            return false;
-        }else if(MessageID.length() == 0) //If it does not have a message ID
-        {
-            return false;
-        }else
-        {
-        return true;
-        }
-                
-    }
-    
-    public String checkRecipientCell()
-    {
-        if(!this.userCellNumber.isEmpty()) //IF the cell number is stored
-        {
-            if(userCellNumber.startsWith("+27")) //Starts with a code
-            {
-                int CellLength =userCellNumber.length()-3; //Count starting after +27
-                if(CellLength <10) //Cell number is no more than 10 charecters
-                {
-                    return "Approved Cell number";
-                }
-            }   
-        }else
-        {
-            //Number not available.
-            return "Not Approved Cell number";
-        }
-            return "Not Approved Cell number";
-    }
-    public String SendMessage()   
-    {
-        
-       //Get number of messages the user wants to send message send
-        System.out.println("How many message do you want to send.");
-         Scanner messageLoop = new Scanner(System.in);
-         String getLoops = messageLoop.nextLine();
-          
-         int numberOfLoops = Integer.parseInt(getLoops); //Convert into a number.
-         
-         for(int index =0; index <numberOfLoops; index++)
-         {
-             //Send User input message
-             int messageNumber =index+1;
-         System.out.println("Type message sent number "+messageNumber );
-         Scanner SendMessage = new Scanner(System.in);
-         String Temp_message = SendMessage.nextLine();
-         
-                 
-         //If the mesage format does not meet req
-          if(Temp_message.length() <=250)
-         {   
-            int ID = this.RandomGenerator(10);
-            MessageID = String.valueOf(ID);
-            
-            //Check if the mesage ID meet the requirements
-            if(this.checkMessageID() ==true)
-            {
-             String Messagedata = String.valueOf(ID)+":"+Temp_message;
-             this.userMessages.add(Messagedata); //temporary store the message send
-             System.out.println("Message successfully send.");
-            }else
-            {
-                System.err.println("Message Unsuccessfully send.");
-            }
-            
-             
-         //Chose what to do with the message
-       System.out.println("Choose which message option \n 1.Store message \n 2.Diregard message");       
-       Scanner ChooseOption = new Scanner(System.in); 
-        String getOption = ChooseOption.nextLine();
-             
-        if(getOption.equals("1")) //Store message
-        {
-      this.storeMessage();
-       
+
+    // =========================
+    // RECIPIENT VALIDATION
+    // =========================
+    public boolean checkRecipientCell(String recipient) {
+
+        if (recipient.startsWith("+27") && recipient.length() == 12) {
+
            
-        }else if(getOption.equals("2")) //Diregard message
-        {
-            System.out.println("Press 0 to delete message.");
-           Scanner Sc_delete  = new Scanner(System.in); 
-            String DeleteMessage = Sc_delete.nextLine();
-            
-            do{
-                if(DeleteMessage.equals("0"))
-                {        
-                    
-                    message = ""; 
-                }
-            }while(!DeleteMessage.equals("0"));
-            
-           
-        }else
-        {
-            System.err.println("Choose the wrong option, try again" );
-        }
-             
-      }else
-     {
-             System.err.println("Please eneter a message of less than 250 characters.");
-     } 
-      }
-   
-        return "Chose incorrect option, Try again";
-    }
-    private boolean WriteToFile(String fileName)
-    {
-        //Write the dat to the file
-         String DataFormat ="";
-         
-         //Read every line of the mesage before storing the data
-    for(String MessageLine: this.userMessages)
-    {
-        DataFormat += MessageLine +"\n"; //each message is stored on seperate lines
-    }
-         
-           try (FileWriter USerData = new FileWriter(fileName)) {
-          
-               //Store the data
-            USerData.write(DataFormat);
+            System.out.println("Cell phone number captured");
+
             return true;
 
-        } catch (IOException e) {
-                return false;
+        } else {
 
+           
+            System.out.println("Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.");
+
+            return false;
         }
     }
 
-private String ReadFromFile(String fileName)
-{
-    String FileData = "";    
-    
-     try (BufferedReader Reader = new BufferedReader(new FileReader(fileName))) {
+    // =========================
+    // ID GENERATOR
+    // =========================
+    private String generateMessageID() {
+        Random rand = new Random();
+        int id = 100000000 + rand.nextInt(900000000);
+        return String.valueOf(id);
+    }
 
-            String line;
-      
-            
-            //While the is more data in the next line
-            while ((line = Reader.readLine()) != null) {
-                //Sepearte the data read by a charecter
-                FileData += line +"@";
+    // =========================
+    // HASH GENERATOR
+    // =========================
+    public String createMessageHash(int messageNumber, String message) {
+
+        if (message == null || message.trim().isEmpty()) {
+            return "INVALID_HASH";
+        }
+
+        String[] words = message.split(" ");
+        String firstWord = words[0];
+        String lastWord = words[words.length - 1];
+
+        if (MessageID == null || MessageID.length() < 2) {
+            return "INVALID_HASH";
+        }
+
+        return (MessageID.substring(0, 2)
+                + ":" + messageNumber
+                + ":" + firstWord + lastWord).toUpperCase();
+    }
+
+    // =========================
+    // SEND MESSAGE
+    // =========================
+    public String sendMessage(Scanner input) {
+
+        System.out.print("How many messages would you like to send? ");
+        int numMessages = Integer.parseInt(input.nextLine());
+
+        for (int i = 1; i <= numMessages; i++) {
+
+            System.out.println("\n===== MESSAGE " + i + " =====");
+
+            // RECIPIENT VALIDATION LOOP
+            String recipient;
+            do {
+                System.out.print("Enter recipient number: ");
+                recipient = input.nextLine();
+            } while (!checkRecipientCell(recipient));
+
+            // MESSAGE INPUT
+            System.out.print("Enter message: ");
+            message = input.nextLine();
+
+            if (message.length() > 250) {
+                int excess = message.length() - 250;
+                System.out.println("Message exceeds 250 characters by " + excess);
+                continue;
             }
-            //IF all the data is stored
-            return FileData;
+
+            MessageID = generateMessageID();
+
+            System.out.println("\n1. Send Message");
+            System.out.println("2. Store Message");
+            System.out.println("3. Disregard Message");
+
+            String option = input.nextLine();
+
+            String hash = createMessageHash(i, message);
+
+            String details =
+                    "Message ID: " + MessageID +
+                    "\nMessage Hash: " + hash +
+                    "\nRecipient: " + recipient +
+                    "\nMessage: " + message;
+
+            // SEND
+            if (option.equals("1")) {
+
+                userMessages.add(details);
+                sentMessages.add(message);
+
+                System.out.println("\n===== Message successfully sent =====");
+                System.out.println(details);
+            }
+
+            // STORE
+            else if (option.equals("2")) {
+
+                storeMessage(recipient);
+
+                userMessages.add(details);
+                storedMessages.add(message);
+                storedMessageIDs.add(MessageID);
+                storedMessageHashes.add(hash);
+                storedRecipients.add(recipient);
+                storedSenders.add("Current User");
+
+                System.out.println("Message successfully stored.");
+            }
+
+            // DISREGARD
+            else if (option.equals("3")) {
+
+                disregardedMessages.add(message);
+                System.out.println("Message disregarded.");
+            }
+
+            else {
+                System.out.println("Invalid option.");
+            }
+        }
+
+        return "Total Messages Sent: " + returnTotalMessages();
+    }
+
+    // =========================
+    // RECENT MESSAGES
+    // =========================
+    public void showRecentMessages() {
+
+        if (sentMessages.isEmpty()) {
+            System.out.println("No messages have been sent yet.");
+            return;
+        }
+
+        System.out.println("\n===== RECENT MESSAGES =====");
+
+        int start = Math.max(0, sentMessages.size() - 5);
+
+        for (int i = start; i < sentMessages.size(); i++) {
+            System.out.println((i + 1) + ". " + sentMessages.get(i));
+        }
+    }
+
+    // =========================
+    // STORE TO FILE
+    // =========================
+    public void storeMessage(String recipient) {
+
+        try {
+            FileWriter writer = new FileWriter("messages.json", true);
+
+            writer.write("{\n");
+            writer.write("\"MessageID\":\"" + MessageID + "\",\n");
+            writer.write("\"Recipient\":\"" + recipient + "\",\n");
+            writer.write("\"Message\":\"" + message + "\"\n");
+            writer.write("}\n");
+
+            writer.close();
+
+            System.out.println("Message stored in messages.json");
 
         } catch (IOException e) {
-            System.err.println("Error when retrieving the messages");
-            return "Error reading";
-        }  
-     
-}
+            System.out.println("Error storing message.");
+        }
+    }
 
-public void storeMessage()
-{
-    //"userMessages.JSON is the file that will store the data
-            boolean isStored = this.WriteToFile("userMessages.JSON");
-            if(isStored ==true)
-            {
-               System.out.println("Message succesfully stored."); 
-            }else
-            {
-                System.err.println("Message Unsuccesfully stored.");
+    // =========================
+    // DISPLAY STORED MESSAGES
+    // =========================
+    public void displayStoredMessages() {
+
+        if (storedMessages.isEmpty()) {
+            System.out.println("No stored messages found.");
+            return;
+        }
+
+        for (int i = 0; i < storedMessages.size(); i++) {
+
+            System.out.println("Sender: " + storedSenders.get(i));
+            System.out.println("Recipient: " + storedRecipients.get(i));
+            System.out.println("Message: " + storedMessages.get(i));
+            System.out.println("--------------------------");
+        }
+    }
+
+    // =========================
+    // LONGEST MESSAGE
+    // =========================
+    public String displayLongestMessage() {
+
+        if (storedMessages.isEmpty()) {
+            return "No stored messages available.";
+        }
+
+        String longest = storedMessages.get(0);
+
+        for (String msg : storedMessages) {
+            if (msg.length() > longest.length()) {
+                longest = msg;
             }
-}
+        }
 
-public String printMessages()
-{
-    //Read the file data for messages
-    String AllMessages = this.ReadFromFile("userMessages.JSON");
-    
-    //Slit the messages apart
-     String[] arrMesage = AllMessages.split("@");
-     
-     for(String Current_Message : arrMesage)
-     {
-         System.out.println(Current_Message);
-         
-     }
-    return AllMessages;
-    
-}
+        return longest;
+    }
 
-public int returnTotalMessages()
-{
-    //Read the file data for messages
-    String AllMessages = this.ReadFromFile("userMessages.JSON");
-    
-    int NumberOfMessages = 0;
-    //Slit the messages apart
-     String[] arrMesage = AllMessages.split("@");
-     
-     //Count the messages 
-     int trackloop =0;
-     while(trackloop <arrMesage.length)
-     {
-       NumberOfMessages++;
-       trackloop++;
-     }
- 
-    return NumberOfMessages;
-    
-}
+    // =========================
+    // SEARCH BY ID
+    // =========================
+    public void searchByMessageID(String id) {
 
+        for (int i = 0; i < storedMessageIDs.size(); i++) {
 
-private int RandomGenerator(int Number)
-{
-    //randomly generate a number from the given range
-    Random range = new Random(Number);
-    return range.nextInt();
-}
+            if (storedMessageIDs.get(i).equals(id)) {
 
+                System.out.println("Recipient: " + storedRecipients.get(i));
+                System.out.println("Message: " + storedMessages.get(i));
+                return;
+            }
+        }
+
+        System.out.println("Message not found.");
+    }
+
+    // =========================
+    // SEARCH BY RECIPIENT
+    // =========================
+    public void searchByRecipient(String recipient) {
+
+        boolean found = false;
+
+        for (int i = 0; i < storedRecipients.size(); i++) {
+
+            if (storedRecipients.get(i).equals(recipient)) {
+
+                System.out.println("Message ID: " + storedMessageIDs.get(i));
+                System.out.println("Message: " + storedMessages.get(i));
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No messages found.");
+        }
+    }
+
+    // =========================
+    // DELETE MESSAGE
+    // =========================
+    public void deleteMessage(String hash) {
+
+        int index = storedMessageHashes.indexOf(hash);
+
+        if (index != -1) {
+
+            storedMessages.remove(index);
+            storedMessageIDs.remove(index);
+            storedMessageHashes.remove(index);
+            storedRecipients.remove(index);
+            storedSenders.remove(index);
+
+            System.out.println("Message deleted.");
+        } else {
+            System.out.println("Message hash not found.");
+        }
+    }
+
+    // =========================
+    // REPORT
+    // =========================
+    public void displayReport() {
+
+        System.out.println("\n===== STORED MESSAGE REPORT =====");
+
+        for (int i = 0; i < storedMessages.size(); i++) {
+
+            System.out.println("Message ID: " + storedMessageIDs.get(i));
+            System.out.println("Message Hash: " + storedMessageHashes.get(i));
+            System.out.println("Sender: " + storedSenders.get(i));
+            System.out.println("Recipient: " + storedRecipients.get(i));
+            System.out.println("Message: " + storedMessages.get(i));
+            System.out.println("--------------------------------");
+        }
+    }
+
+    // =========================
+    // TOTAL SENT
+    // =========================
+    public int returnTotalMessages() {
+        return sentMessages.size();
+    }
 }
-        
